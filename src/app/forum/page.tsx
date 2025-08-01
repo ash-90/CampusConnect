@@ -133,7 +133,15 @@ const ForumPage = () => {
         }
     };
 
-    const generatePresetMessage = (post: { id?: number; title: any; description?: string; author: any; category?: string; deadline?: string; createdAt?: string; }) => {
+    type Author = {
+        id?: string | number;
+        name: string;
+        avatar?: string;
+        telegram: string;
+        year?: string | number;
+    };
+
+    const generatePresetMessage = (post: { id?: number; title: string; description?: string; author: Author; category?: string; deadline?: string; createdAt?: string; }) => {
         const senderName = userProfile.name || 'CampusConnect User';
         const profileLink = `https://campusconnect.smu.edu.sg/profile/${userProfile.id || '1'}`;
 
