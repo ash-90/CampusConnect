@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // to change
+  provider = "cockroachdb"
+  // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+  // Further reading:
+  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+  url      = env("DATABASE_URL")
+}
+
+// Necessary for Next auth
+model Account {
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String? // @db.Text
+  access_token             String? // @db.Text
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String? // @db.Text
+  session_state            String?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refresh_token_expires_in Int?
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id             String           @id @default(cuid())
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  name           String?
+  email          String?          @unique
+  emailVerified  DateTime?
+
+  // yearOfStudy   YearOfStudy
+  enrollmentYear Int?
+  course         Course?
+  image           String
+  bannerURL      String?
+  intro          String?
+  hardSkills     Json?    
+  softSkills     Json?
+  project        Json?
+  interest       Json?
+  socialMedia    Json?
+  accounts       Account[]
+  sessions       Session[]
+
+  Forum          Forum[]
+  Modules        ModulesOnUsers[]
+
+  @@index([course])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Forum {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deadline  DateTime
+  title     String
+  tag       TagType
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likes     Int
+  shares    Int
+}
+
+model Modules {
+  id      String           @id @default(cuid())
+  name    String
+  classId String           @unique
+  prof    String
+  User    ModulesOnUsers[]
+  userId  String?
+}
+
+model ModulesOnUsers {
+  user     User    @relation(fields: [userId], references: [id])
+  userId   String
+  module   Modules @relation(fields: [moduleId], references: [id])
+  moduleId String
+
+  @@id([userId, moduleId])
+}
+
+enum YearOfStudy {
+  YEAR_ONE
+  YEAR_TWO
+  YEAR_THREE
+  YEAR_FOUR
+}
+
+enum Course {
+  COMPUTER_SCIENCE     @map("CS")
+  INFORMATION_SYSTEMS  @map("IS")
+  ACCOUNTANCY          @map("ACC")
+  BUSINESS_MANAGEMENT  @map("BBM")
+  ECONOMICS            @map("ECON")
+  COMPUTING_AND_LAW    @map("CLAW")
+  SOFTWARE_ENGINEERING @map("SE")
+  LAW                  @map("LLB")
+  SOCIAL_SCIENCE       @map("SOCSC")
+  INTEGRATIVE_STUDIES  @map("BIS")
+  SMU_DUKE_NUS_PATHWAY @map("DUKE_NUS")
+}
+
+enum TagType {
+  QUEST
+  TEAM_UP
+  HELP_ME
+  PROJECTS
+}
