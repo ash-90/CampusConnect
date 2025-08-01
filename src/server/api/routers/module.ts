@@ -70,11 +70,11 @@ export const moduleRouter = createTRPCRouter({
                 throw new Error("Module with this class ID already exists");
             }
 
-            const module = await ctx.db.modules.create({
+            const mod = await ctx.db.modules.create({
                 data: input,
             });
 
-            return module;
+            return mod;
         }),
 
     // Add Module to User (Create User Module relationship)
@@ -186,7 +186,7 @@ export const moduleRouter = createTRPCRouter({
     getModuleById: protectedProcedure
         .input(z.object({ id: z.string() }))
         .query(async ({ ctx, input }) => {
-            const module = await ctx.db.modules.findUnique({
+            const mod = await ctx.db.modules.findUnique({
                 where: { id: input.id },
                 include: {
                     User: {
@@ -204,14 +204,14 @@ export const moduleRouter = createTRPCRouter({
                 },
             });
 
-            if (!module) {
+            if (!mod) {
                 throw new Error("Module not found");
             }
 
             return {
-                ...module,
-                enrolledUsersCount: module.User.length,
-                enrolledUsers: module.User.map(u => u.user),
+                ...mod,
+                enrolledUsersCount: mod.User.length,
+                enrolledUsers: mod.User.map(u => u.user),
             };
         }),
 });

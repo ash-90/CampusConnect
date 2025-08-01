@@ -55,7 +55,7 @@ export const authConfig = {
      async signIn({ user, account, profile }) {
       // Only allow SMU email addresses
       if (account?.provider === "google") {
-        const email = user.email || profile?.email;
+        const email = user.email ?? profile?.email;
         if (!email?.endsWith("@smu.edu.sg")) {
           return false; // Reject sign-in
         }
